@@ -1,0 +1,22 @@
+﻿<Window x:Class="Google_Keyword_Ranker.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Google_Keyword_Ranker"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <Button x:Name="btnGo" Content="Button" Margin="0,10,10,0" VerticalAlignment="Top" Height="23" RenderTransformOrigin="0.821,0.551" HorizontalAlignment="Right" Width="77" Click="btnGo_Click"/>
+        <TextBox x:Name="tbSearch" Height="23" Margin="0,10,92,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Right" Width="415"/>
+        <ListView x:Name="listKeyword" Margin="10,38,10,10" GridViewColumnHeader.Click="GridViewColumnHeader_Click">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Keyword" Width="300" DisplayMemberBinding="{Binding Keyword}"/>
+                    <GridViewColumn Header="Frequency" DisplayMemberBinding="{Binding Frequency}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+
+    </Grid>
+</Window>
