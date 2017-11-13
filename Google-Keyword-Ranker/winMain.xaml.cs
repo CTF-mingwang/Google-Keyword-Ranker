@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml;
 using Google.Apis.Customsearch.v1;
 using Google.Apis.Customsearch.v1.Data;
 using Google.Apis.Services;
@@ -48,8 +49,6 @@ namespace Google_Keyword_Ranker
 
         public static IList<Result> Search(string query)
         {
-            Console.WriteLine("Executing google custom search for query: {0} ...", query);
-
             CseResource.ListRequest listRequest = Service.Cse.List(query);
             listRequest.Cx = cx;
 
@@ -76,6 +75,11 @@ namespace Google_Keyword_Ranker
 
         void addCollection(string str)
         {
+            if (str.Trim() == "")
+            {
+                return;
+            }
+            str = str.Trim();
             foreach (var item in listKeyword.Items)
             {
                 var keyword = (KeywordItem) item;
@@ -111,38 +115,95 @@ namespace Google_Keyword_Ranker
             }
         }
 
+
+        private String[] metas = new String[]
+        {
+            "//meta[@name='description']",
+            "//meta[@name='keywords']"
+        };
+
+        private String[] tags = new String[]
+        {
+            "h1",
+            "h2",
+            "h3",
+            "title"
+        };
+
+        string getHTML(string url)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                using (HttpResponseMessage response = client.GetAsync(url).Result)
+                {
+                    using (HttpContent content = response.Content)
+                    {
+                        return content.ReadAsStringAsync().Result;
+                    }
+                }
+            }
+        }
+
         private void search ()
         {
             string query = tbSearch.Text;
             var results = Search(query);
             foreach (Result result in results)
             {
-                try
+                var web = new HtmlWeb();
+                HtmlDocument doc = web.Load(result.Link);
+                foreach (string metaname in metas)
                 {
-                    var web = new HtmlWeb();
-                    HtmlDocument doc = web.Load(result.Link);
-                    //var nodes = doc.DocumentNode.Descendants("//h1").FirstOrDefault();
-                    var nodes = doc.DocumentNode.SelectNodes("//meta");
-                    foreach (var mdnode in nodes)
+
+                    try
                     {
-                        if (mdnode != null)
+                        var nodes = doc.DocumentNode.SelectNodes(metaname);
+                        foreach (var mdnode in nodes)
                         {
-                            HtmlAttribute desc;
-                            foreach (var str in mdnode.Attributes)
+                            if (mdnode != null)
                             {
-                                String[] words = str.Value.Split(' ');
-                                foreach (string word in words)
+                                HtmlAttribute desc;
+                                foreach (var str in mdnode.Attributes)
                                 {
-                                    addCollection(word);
+                                    String[] words = str.Value.Split(' ', ',');
+                                    foreach (string word in words)
+                                    {
+                                        addCollection(word);
+                                    }
                                 }
                             }
                         }
                     }
+                    catch
+                    {
+                    }
                 }
-                catch { }
+                foreach (string tagname in tags)
+                {
+                    try
+                    {
+                        var nodes = doc.DocumentNode.Descendants(tagname).ToList();
+                        foreach (HtmlNode mdnode in nodes)
+                        {
+                            String[] words = mdnode.InnerText.Split(' ', ',');
+                            foreach (string word in words)
+                            {
+                                addCollection(word);
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+                }
             }
 
             tbSearch.IsEnabled = btnGo.IsEnabled = true;
+        }
+
+        private void tbSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            btnGo.IsEnabled = (tbSearch.Text.Trim() != "");
         }
     }
 }

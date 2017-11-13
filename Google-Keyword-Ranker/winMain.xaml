@@ -7,8 +7,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <Button x:Name="btnGo" Content="Button" Margin="0,10,10,0" VerticalAlignment="Top" Height="23" RenderTransformOrigin="0.821,0.551" HorizontalAlignment="Right" Width="77" Click="btnGo_Click"/>
-        <TextBox x:Name="tbSearch" Height="23" Margin="0,10,92,0" TextWrapping="Wrap" VerticalAlignment="Top" HorizontalAlignment="Right" Width="415"/>
+        <Button x:Name="btnGo" Content="Search" Margin="0,10,10,0" VerticalAlignment="Top" Height="23" RenderTransformOrigin="0.821,0.551" HorizontalAlignment="Right" Width="77" Click="btnGo_Click" IsEnabled="False"/>
+        <TextBox x:Name="tbSearch" Height="23" Margin="10,10,92,0" TextWrapping="Wrap" VerticalAlignment="Top" TextChanged="tbSearch_TextChanged"/>
         <ListView x:Name="listKeyword" Margin="10,38,10,10" GridViewColumnHeader.Click="GridViewColumnHeader_Click">
             <ListView.View>
                 <GridView>
