@@ -9,14 +9,21 @@
     <Grid>
         <Button x:Name="btnGo" Content="Search" Margin="0,10,10,0" VerticalAlignment="Top" Height="23" RenderTransformOrigin="0.821,0.551" HorizontalAlignment="Right" Width="77" Click="btnGo_Click" IsEnabled="False"/>
         <TextBox x:Name="tbSearch" Height="23" Margin="10,10,92,0" TextWrapping="Wrap" VerticalAlignment="Top" TextChanged="tbSearch_TextChanged"/>
-        <ListView x:Name="listKeyword" Margin="10,38,10,10" GridViewColumnHeader.Click="GridViewColumnHeader_Click">
+        <ListView x:Name="listKeyword" Margin="10,59,10,10.5" GridViewColumnHeader.Click="GridViewColumnHeader_Click">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Keyword" Width="300" DisplayMemberBinding="{Binding Keyword}"/>
                     <GridViewColumn Header="Frequency" DisplayMemberBinding="{Binding Frequency}"/>
+                    <GridViewColumn Header="Tag" Width ="150" DisplayMemberBinding="{Binding Metatag}"/>
                 </GridView>
             </ListView.View>
         </ListView>
+        <CheckBox x:Name="cbTitle" Content="Title" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top" Height="16" Width="80" IsChecked="True" Checked="cbTitle_Checked"/>
+        <CheckBox x:Name="cbDescription" Content="Description" HorizontalAlignment="Left" Margin="75,38,0,0" VerticalAlignment="Top" IsChecked="True" Checked="cbTitle_Checked"/>
+        <CheckBox x:Name="cbH1" Content="H1" HorizontalAlignment="Left" Margin="295,38,0,0" VerticalAlignment="Top" Checked="cbTitle_Checked"/>
+        <CheckBox x:Name="cbH2" Content="H2" HorizontalAlignment="Left" Margin="352,38,0,0" VerticalAlignment="Top" Checked="cbTitle_Checked"/>
+        <CheckBox x:Name="cbH3" Content="H3" HorizontalAlignment="Left" Margin="411,38,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.276,0.438" Checked="cbTitle_Checked"/>
+        <CheckBox x:Name="cbKeywords" Content="Meta Keywords" HorizontalAlignment="Left" Margin="180,38,0,0" VerticalAlignment="Top" Checked="cbTitle_Checked"/>
 
     </Grid>
 </Window>

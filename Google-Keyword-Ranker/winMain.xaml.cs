@@ -35,6 +35,8 @@ namespace Google_Keyword_Ranker
             InitializeComponent();
         }
 
+        List<KeywordItem> keywordCollection = new List<KeywordItem>();
+
         private static string API_KEY = "AIzaSyAYWbHusC1aSia2x_PYL54Sgp7XdeqnMUc";
 
         //The custom search engine identifier
@@ -71,25 +73,79 @@ namespace Google_Keyword_Ranker
         {
             public string Keyword { get; set; }
             public int Frequency { get; set; }
+            public List<string> Metatag { get; set; }
         }
 
-        void addCollection(string str)
+        void refreshCollection()
+        {
+            try
+            {
+                metas.Clear();
+                tags.Clear();
+                if (cbTitle.IsChecked == true)
+                {
+                    metatags.Add("title");
+                }
+                if (cbDescription.IsChecked == true)
+                {
+                    metatags.Add("description");
+                }
+                if (cbKeywords.IsChecked == true)
+                {
+                    metatags.Add("keywords");
+                }
+                if (cbH1.IsChecked == true)
+                {
+                    metatags.Add("h1");
+                }
+                if (cbH2.IsChecked == true)
+                {
+                    metatags.Add("h2");
+                }
+                if (cbH3.IsChecked == true)
+                {
+                    metatags.Add("h3");
+                }
+                refreshList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                //throw;
+            }
+            
+        }
+
+        void addCollection(string str, string metatag)
         {
             if (str.Trim() == "")
             {
                 return;
             }
             str = str.Trim();
-            foreach (var item in listKeyword.Items)
+            foreach (var keyword in keywordCollection)
             {
-                var keyword = (KeywordItem) item;
                 if (keyword.Keyword == str)
                 {
                     keyword.Frequency += 1;
+                    Console.WriteLine(keyword.Frequency.ToString());
+                    bool flag = true;
+                    foreach (string metatagItem in keyword.Metatag)
+                    {
+                        if (metatagItem == metatag)
+                        {
+                            flag = false;
+                            break;
+                        }
+                    }
+                    if (flag)
+                    {
+                        keyword.Metatag.Add(metatag);
+                    }
                     return;
                 }
             }
-            listKeyword.Items.Add(new KeywordItem { Keyword = str, Frequency = 1});
+            keywordCollection.Add(new KeywordItem { Keyword = str, Frequency = 1, Metatag = new List<string>(){metatag}});
         }
 
         private void GridViewColumnHeader_Click(object sender, RoutedEventArgs e)
@@ -116,19 +172,10 @@ namespace Google_Keyword_Ranker
         }
 
 
-        private String[] metas = new String[]
-        {
-            "//meta[@name='description']",
-            "//meta[@name='keywords']"
-        };
+        private List<string> metas = new List<string>();
+        private List<string> tags = new List<string>();
 
-        private String[] tags = new String[]
-        {
-            "h1",
-            "h2",
-            "h3",
-            "title"
-        };
+        private List<string> metatags = new List<string>();
 
         string getHTML(string url)
         {
@@ -144,17 +191,50 @@ namespace Google_Keyword_Ranker
             }
         }
 
+        void refreshList()
+        {
+            listKeyword.Items.Clear();
+            bool flag;
+            foreach (KeywordItem keyword in keywordCollection)
+            {
+                flag = false;
+                List<string> newmetatags = new List<string>();
+                foreach (string keywordmetatag in keyword.Metatag)
+                {
+                    foreach (string metatagitem in metatags)
+                    {
+                        if (keywordmetatag == metatagitem)
+                        {
+                            newmetatags.Add(keywordmetatag);
+                        }
+                    }
+                }
+                if (newmetatags.Count > 0)
+                {
+                    listKeyword.Items.Add(new { Keyword = keyword.Keyword, Frequency = keyword.Frequency, Metatag = String.Join(", ", keyword.Metatag) });
+                }
+                //MessageBox.Show(listKeyword.Items.Count.ToString());
+            }
+        }
+
         private void search ()
         {
             string query = tbSearch.Text;
             var results = Search(query);
+            tags.Clear();
+            tags.Add("title");
+            metas.Add("//meta[@name='description']");
+            metas.Add("//meta[@name='keywords']");
+            tags.Add("h1");
+            tags.Add("h2");
+            tags.Add("h3");
+            
             foreach (Result result in results)
             {
                 var web = new HtmlWeb();
                 HtmlDocument doc = web.Load(result.Link);
                 foreach (string metaname in metas)
                 {
-
                     try
                     {
                         var nodes = doc.DocumentNode.SelectNodes(metaname);
@@ -168,7 +248,7 @@ namespace Google_Keyword_Ranker
                                     String[] words = str.Value.Split(' ', ',');
                                     foreach (string word in words)
                                     {
-                                        addCollection(word);
+                                        addCollection(word, (metaname == "//meta[@name='description']" ? "description" : "keywords"));
                                     }
                                 }
                             }
@@ -188,7 +268,7 @@ namespace Google_Keyword_Ranker
                             String[] words = mdnode.InnerText.Split(' ', ',');
                             foreach (string word in words)
                             {
-                                addCollection(word);
+                                addCollection(word, tagname);
                             }
                         }
                     }
@@ -199,11 +279,23 @@ namespace Google_Keyword_Ranker
             }
 
             tbSearch.IsEnabled = btnGo.IsEnabled = true;
+            refreshList();
         }
 
         private void tbSearch_TextChanged(object sender, TextChangedEventArgs e)
         {
             btnGo.IsEnabled = (tbSearch.Text.Trim() != "");
+        }
+        
+
+        private void cbTitle_Checked(object sender, RoutedEventArgs e)
+        {
+            refreshCollection();
+        }
+
+        private void cbH2_Checked(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
